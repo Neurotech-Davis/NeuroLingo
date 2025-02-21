@@ -70,7 +70,7 @@
     <Param val="1000" valType="num" updates="None" name="plPupilRemoteTimeoutMs"/>
     <Param val="False" valType="bool" updates="None" name="plPupillometryOnly"/>
     <Param val="psychopy_iohub_surface" valType="str" updates="None" name="plSurfaceName"/>
-    <Param val="1" valType="code" updates="None" name="runMode"/>
+    <Param val="0" valType="code" updates="None" name="runMode"/>
     <Param val="False" valType="bool" updates="None" name="rush"/>
     <Param val="time" valType="str" updates="None" name="sortColumns"/>
     <Param val="" valType="str" updates="None" name="tbLicenseFile"/>
@@ -4916,8 +4916,8 @@
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
       </RoutineSettingsComponent>
       <CodeComponent name="Set_Counterbalance_Here_And_NumReps" plugin="None">
-        <Param val="numReps = 8&amp;#10;&amp;#10;# This is the amount of repetitions&amp;#10;# for each set of words.&amp;#10;# Usually we set it to 8, but for debugging set it to 1." valType="extendedCode" updates="constant" name="Before Experiment"/>
-        <Param val="numReps = 8;&amp;#10;" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="numReps = 7&amp;#10;&amp;#10;# This is the amount of repetitions&amp;#10;# for each set of words.&amp;#10;# Usually we set it to 8, but for debugging set it to 1." valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="numReps = 7;&amp;#10;" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
         <Param val="#counterbalance = True&amp;#10;counterbalance = False&amp;#10;&amp;#10;&amp;#10;# In the counterbalance order, we cancel the B trials&amp;#10;if counterbalance == True:&amp;#10;    nreps_A = 0&amp;#10;    nreps_B = 1&amp;#10;else:&amp;#10;    nreps_A = 1&amp;#10;    nreps_B = 0" valType="extendedCode" updates="constant" name="Begin Experiment"/>
         <Param val="counterbalance = false;&amp;#10;if ((counterbalance === true)) {&amp;#10;    nreps_A = 0;&amp;#10;    nreps_B = 1;&amp;#10;} else {&amp;#10;    nreps_A = 1;&amp;#10;    nreps_B = 0;&amp;#10;}&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="Begin JS Routine"/>

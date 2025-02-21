@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.4),
-    on February 14, 2025, at 21:59
+    on February 20, 2025, at 20:47
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -168,7 +168,7 @@ def setupData(expInfo, dataDir=None):
     thisExp = data.ExperimentHandler(
         name=expName, version='',
         extraInfo=expInfo, runtimeInfo=None,
-        originPath='C:\\Users\\cheng\\OneDrive\\Desktop\\NeuroLingo\\PsychoPy_stuff\\Final Test\\finaltest_lastrun.py',
+        originPath='C:\\Users\\akim0\\Documents\\OpenBCI_GUI\\NeuroLingo\\PsychoPy_stuff\\Final Test\\finaltest_lastrun.py',
         savePickle=True, saveWideText=True,
         dataFileName=dataDir + os.sep + filename, sortColumns='time'
     )
