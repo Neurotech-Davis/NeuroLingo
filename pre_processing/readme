@@ -1,1 +1,7 @@
 Put just the program(s) to run preprocessing here, leave the data in a seperate folder. 
+
+Here's some resources:
+best resource (imo) -> https://mne.tools/stable/auto_tutorials/intro/10_overview.html
+mne documentation -> https://mne.tools/1.8/documentation/cookbook.html
+more mne!!! ->https://neuraldatascience.io/7-eeg/mne_python.html
+preprocessing from last year -> https://colab.research.google.com/drive/1tPk8ZVX92H_kP-eBToUR02pwkVVQi0N2?usp=sharing
