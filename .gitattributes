@@ -1,0 +1,2 @@
+raw_EEG_data/*.txt filter=lfs diff=lfs merge=lfs -text
+raw_EEG_data/*.csv filter=lfs diff=lfs merge=lfs -text
