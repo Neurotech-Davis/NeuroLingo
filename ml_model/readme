@@ -1,0 +1,11 @@
+Overview of the model:
+The model, an SVM, will classify EEG readings as learned vs not learned.
+
+Input:
+Epochs from the data that each contain a label for learned vs not learned.
+
+Output:
+This EEG reading represents learned or this EEG reading represents not learned. 
+
+Resources:
+- 
