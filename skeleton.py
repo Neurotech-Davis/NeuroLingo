@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((600, 400)) #display screen
 pygame.display.set_caption("Language Learning Test")
 
 # Fonts
-font = pygame.font.SysFont("Language/NotoSansEthiopic-VariableFont_wdth,wght.ttf", 60) #can upload font here to be able to show amharic 
+font = pygame.font.SysFont("NotoSansEthiopic-VariableFont_wdth,wght.ttf", 60) #can upload font here to be able to show amharic 
 small_font = pygame.font.SysFont(None, 40) #font for the choices
 clock = pygame.time.Clock()
 
