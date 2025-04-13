@@ -14,9 +14,7 @@ from mne import create_info, io
 
 #**************Insert pop up code
 # The following code claims to receive live data and put it into 8 x 250 array
-from pyOpenBCI import OpenBCICyton
-import numpy as np
-from collections import deque
+
 # === Setup ===
 SCALE_FACTOR = (4500000) / 24 / (2**23 - 1)
 CHANNEL_COUNT = 8
