@@ -59,10 +59,18 @@ SYMBOL_DISPLAY_TIME = 3
 TOTAL_DURATION = 30
 
 symbols_data = [
-    {"symbol": "ሂ"},
-    {"symbol": "ቁ"},
-    {"symbol": "ኙ"},
-    # Add more as needed
+    {"symbol": "ቮ"}, {"symbol": "ተ"}, {"symbol": "ቺ"}, {"symbol": "ኇ"}, {"symbol": "ነ"}, {"symbol": "ኟ"},
+    {"symbol": "አ"}, {"symbol": "ዒ"}, {"symbol": "ዞ"}, {"symbol": "የ"}, {"symbol": "ገ"}, {"symbol": "ጵ"},
+
+    {"symbol": "ኈ"}, {"symbol": "ኴ"}, {"symbol": "ዄ"}, {"symbol": "ጕ"}, {"symbol": "፠"}, {"symbol": "፫"},
+    {"symbol": "፸"}, {"symbol": "ሀ"}, {"symbol": "ሊ"}, {"symbol": "ሧ"}, {"symbol": "ቅ"}, {"symbol": "ቤ"},
+    
+    {"symbol": "ሐ"}, {"symbol": "ሜ"}, {"symbol": "ሣ"}, {"symbol": "ሯ"}, {"symbol": "ሴ"}, {"symbol": "ሿ"},
+    {"symbol": "ቃ"}, {"symbol": "ብ"}, {"symbol": "ቬ"}, {"symbol": "ት"}, {"symbol": "ቾ"}, {"symbol": "ኃ"},
+
+    {"symbol": "ና"}, {"symbol": "ኞ"}, {"symbol": "ኧ"}, {"symbol": "ኬ"}, {"symbol": "ኼ"}, {"symbol": "ው"},
+    {"symbol": "ዐ"}, {"symbol": "ዥ"}, {"symbol": "ዚ"}, {"symbol": "ያ"}, {"symbol": "ፗ"}, {"symbol": "ቈ"},
+    #Sets 1,2,3, and 4
 ]
 
 def draw_screen(symbol, prediction=None):
