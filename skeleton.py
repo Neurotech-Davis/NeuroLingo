@@ -9,6 +9,8 @@ from collections import deque
 import pickle
 from scipy import signal
 from sklearn.decomposition import PCA
+from mne.preprocessing import ICA
+from mne import create_info, io
 
 # --- EEG Constants ---
 SCALE_FACTOR = (4500000) / 24 / (2**23 - 1)
@@ -36,6 +38,15 @@ def bandpass(start, stop, data, fs=250):
     bp_Hz = np.array([start, stop])
     b, a = signal.butter(5, bp_Hz / (fs / 2.0), btype='bandpass')
     return signal.lfilter(b, a, data, axis=0)
+
+def apply_ica(eeg_data):
+    info = create_info(ch_names=[f'chan{i}' for i in range(CHANNEL_COUNT)], sfreq=SAMPLE_RATE, ch_types='eeg')
+    raw = io.RawArray(eeg_data, info)
+    ica = ICA(n_components=CHANNEL_COUNT, random_state=42, max_iter=800)
+    ica.fit(raw)
+    ica.detect_artifacts(raw)
+    ica.apply(raw)
+    return raw.get_data()
 
 def apply_pca(data, n_components=8):
     pca = PCA(n_components=n_components)
@@ -111,6 +122,7 @@ while time.time() - start_time < TOTAL_DURATION:
         for i in range(eeg_array.shape[0]):
             eeg_array[i] = notch_filter(60, eeg_array[i])
         eeg_array = bandpass(0.1, 30, eeg_array)
+        eeg_array = apply_ica(eeg_array)
         eeg_array = apply_pca(eeg_array)
 
         features = eeg_array.flatten().reshape(1, -1)
