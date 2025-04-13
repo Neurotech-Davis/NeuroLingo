@@ -50,18 +50,20 @@ stream_thread.start()
 pygame.init()
 screen = pygame.display.set_mode((600, 400))
 pygame.display.set_caption("Language Learning Test")
-font = pygame.font.SysFont("NotoSansEthiopic-VariableFont_wdth,wght.ttf", 60) #Not working 
+font = pygame.font.SysFont(None, 60) #Not working 
 small_font = pygame.font.SysFont(None, 40)
 clock = pygame.time.Clock()
 
 # --- Configuration ---
-SYMBOL_DISPLAY_TIME = 3
-TOTAL_DURATION = 30
+#SYMBOL_DISPLAY_TIME = 3
+#TOTAL_DURATION = 30
 
 symbols_data = [
-    {"symbol": "ሂ"},
-    {"symbol": "ቁ"},
-    {"symbol": "ኙ"},
+    {"symbol": "Computer"},
+    {"symbol": "Water"},
+    {"symbol": "Cmaflr"},
+    {"symbol": "Amazing"},
+    {"symbol": "Moasdut"},
     # Add more as needed
 ]
 
@@ -81,35 +83,48 @@ def get_next_symbol(index):
     return base["symbol"]
 
 # --- Main Loop ---
+# --- Updated Main Loop for 1-minute test with 5-sec intervals ---
+
 start_time = time.time()
 symbol_index = 0
+INTERVAL = 5  # seconds
+WORD_DISPLAY_TIME = 1  # seconds
+TOTAL_DURATION = 60  # run for 1 minute
 
 while time.time() - start_time < TOTAL_DURATION:
+    interval_start = time.time()
     symbol = get_next_symbol(symbol_index)
-    draw_screen(symbol)
-    symbol_start = time.time()
     response = None
 
-    while time.time() - symbol_start < SYMBOL_DISPLAY_TIME:
+    # Display word for 1 second
+    draw_screen(symbol)
+    time.sleep(WORD_DISPLAY_TIME)
+
+    # Extract EEG and predict
+    window = [s for t, s in eeg_history if interval_start <= t <= interval_start + EEG_WINDOW_SEC]
+    if len(window) >= EEG_WINDOW_SAMPLES * 0.8:
+        eeg_array = np.array(window).T  # shape: (channels, timepoints)
+        features = eeg_array.flatten().reshape(1, -1)
+        prediction = model.predict(features)[0]
+        print(f"Prediction: {prediction}")
+        response = prediction
+
+    # Display prediction for remainder of interval (4 seconds)
+    if response is not None:
+        draw_screen(symbol, prediction=response)
+    else:
+        draw_screen(symbol, prediction="No EEG")
+
+    # Wait for the rest of the 5-second interval
+    while time.time() - interval_start < INTERVAL:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-        # Check if it's time to extract EEG window
-        if not response and time.time() - symbol_start >= EEG_WINDOW_SEC:
-            window = [s for t, s in eeg_history if symbol_start <= t <= symbol_start + EEG_WINDOW_SEC]
-            if len(window) >= EEG_WINDOW_SAMPLES * 0.8:
-                eeg_array = np.array(window).T  # shape: (channels, timepoints)
-                features = eeg_array.flatten().reshape(1, -1)
-                prediction = model.predict(features)[0]
-                print(f"Prediction: {prediction}")
-                response = prediction
-                draw_screen(symbol, prediction)
-
         clock.tick(30)
 
     symbol_index += 1
 
 pygame.quit()
 print("Done!")
+
