@@ -2,175 +2,164 @@ import pygame
 import sys
 import time
 import threading
-import joblib
 import numpy as np
 from pyOpenBCI import OpenBCICyton
 from collections import deque
 import pickle
-from scipy import signal
-from sklearn.decomposition import PCA
+import scipy.signal as signal
 from mne.preprocessing import ICA
 from mne import create_info, io
+from sklearn.decomposition import PCA
 
-#**************Insert pop up code
-# The following code claims to receive live data and put it into 8 x 250 array
-
-# === Setup ===
-SCALE_FACTOR = (4500000) / 24 / (2**23 - 1)
+# === Configuration ===
+COM_PORT = 'COM8'
 CHANNEL_COUNT = 8
-SAMPLE_RATE = 250
-BUFFER_SIZE = SAMPLE_RATE * 1  # 1 second of data
-# Initialize data buffer for each channel
-eeg_buffers = [deque(maxlen=BUFFER_SIZE) for _ in range(CHANNEL_COUNT)]
-# === Callback: This runs every time a sample arrives ===
+SAMPLE_RATE = 255
+EEG_WINDOW_SEC = 0.6
+# Number of samples in analysis window
+EEG_WINDOW_SAMPLES = int(SAMPLE_RATE * EEG_WINDOW_SEC)  # ~153
+# Feature count = channels × samples (no padding needed)
+N400_START_SAMPLES = 0
+N400_END_SAMPLES   = EEG_WINDOW_SAMPLES + 1  # include endpoint ⇒ 154 samples
+N400_CHANNELS     = list(range(CHANNEL_COUNT))
+EXPECTED_FEATURES = len(N400_CHANNELS) * (N400_END_SAMPLES - N400_START_SAMPLES)
+print(f"Expecting {EXPECTED_FEATURES} features ({len(N400_CHANNELS)} channels × {N400_END_SAMPLES} samples)")
+
+WORD_DISPLAY_TIME = 1.5  # seconds
+TRIAL_INTERVAL   = 8.0  # seconds
+
+# === Load Model & Transforms ===
+with open(r'C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/ml_model/my_model.pkl','rb') as f:
+    model = pickle.load(f, fix_imports=True, encoding='latin1')
+print("Loaded RF model classes:", model.classes_)
+# Optional: load pre-fitted ICA & PCA
+try:
+    with open(r'C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/ml_model/ica.pkl','rb') as f:
+        ica = pickle.load(f)
+    with open(r'C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/ml_model/pca.pkl','rb') as f:
+        pca = pickle.load(f)
+    print("Loaded ICA & PCA objects from disk.")
+except FileNotFoundError:
+    print("[WARNING] ICA/PCA pickles not found; skipping transforms.")
+    ica = pca = None
+
+# === Data Buffer ===
+eeg_buffer = deque(maxlen=EEG_WINDOW_SAMPLES+1)
+
+# === Filters ===
+def notch_filter(data, freq=60, fs=SAMPLE_RATE):
+    b, a = signal.butter(3, [(freq-1.5)/(fs/2), (freq+1.5)/(fs/2)], btype='bandstop')
+    return signal.filtfilt(b, a, data, axis=-1)
+
+
+def bandpass_filter(data, low=1.0, high=30.0, fs=SAMPLE_RATE):
+    b, a = signal.butter(5, [low/(fs/2), high/(fs/2)], btype='bandpass')
+    return signal.filtfilt(b, a, data, axis=-1)
+
+# === Sample Handler (Callback) ===
 def handle_sample(sample):
-    for i in range(CHANNEL_COUNT):
-        value = sample.channels_data[i] * SCALE_FACTOR
-        eeg_buffers[i].append(value)
-# === Stream Setup ===
-board = OpenBCICyton(port='COM8', daisy=False)
-board.start_stream(handle_sample)
-# === Collect for 1 second ===
-import time
-time.sleep(1.0)  # Wait for buffer to fill with 1 second of data
-# === Stop stream and disconnect ===
-board.stop_stream()
-board.disconnect()
-# === Convert to array ===
-raw_epoch = np.array([list(buf) for buf in eeg_buffers])  # shape: (8, 250)
-print(raw_epoch.shape)  # for confirmation
+    # Debugging: confirm callback is firing
+    if len(eeg_buffer) == 0:
+        print("[DEBUG] First EEG sample received")
+    # convert raw to microvolts
+    scaled = [ch * (4500000/24/(2**23-1)) for ch in sample.channels_data]
+    eeg_buffer.append(scaled)
+    if len(eeg_buffer) % 50 == 0:
+        print(f"[DEBUG] EEG buffer length: {len(eeg_buffer)}/{EEG_WINDOW_SAMPLES+1}")
 
-# --- EEG Constants ---
-SCALE_FACTOR = (4500000) / 24 / (2**23 - 1)
-CHANNEL_COUNT = 8
-SAMPLE_RATE = 250
-EEG_WINDOW_SEC = 0.8
-EEG_WINDOW_SAMPLES = int(SAMPLE_RATE * EEG_WINDOW_SEC)
-eeg_history = deque(maxlen=1000)
+# === Stream Worker ===
+def stream_worker():
+    while True:
+        try:
+            board = OpenBCICyton(port=COM_PORT, daisy=False)
+            board.start_stream(handle_sample)
+            print(f"[INFO] Streaming from {COM_PORT}")
+            break
+        except Exception as e:
+            print(f"[ERROR] EEG stream error: {e}. Retrying in 2s...")
+            time.sleep(2)
 
-# --- Load ML Model ---
-model_path = 'C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/ml_model/my_model.pkl'
-with open(model_path, 'rb') as file:
-    model = pickle.load(file)
+threading.Thread(target=stream_worker, daemon=True).start()
 
-# --- EEG Filtering Functions ---
-def notch_filter(val, data, fs=250):
-    notch_freq_Hz = np.array([float(val)])
-    for freq_Hz in np.nditer(notch_freq_Hz):
-        bp_stop_Hz = freq_Hz + 3.0 * np.array([-1, 1])
-        b, a = signal.butter(3, bp_stop_Hz / (fs / 2.0), 'bandstop')
-        data = signal.lfilter(b, a, data)
-    return data
+# === Preprocessing ===
+def preprocess_window(window):
+    arr = np.array(window).T
+    print(f"Raw arr size: {arr.shape}")
+    # slice exactly the 0–600ms window (inclusive)
+    arr = arr[N400_CHANNELS, N400_START_SAMPLES:N400_END_SAMPLES]
+    print(f"Sliced arr size: {arr.shape}")
+    arr = notch_filter(arr)
+    arr = bandpass_filter(arr)
+    if ica:
+        arr = ica.apply(arr)
+        print(f"After ICA, arr size: {arr.shape}")
+    if pca:
+        arr = pca.transform(arr.T).T
+        print(f"After PCA, arr size: {arr.shape}")
+    flat = arr.flatten()
+    print(f"flat.size = {flat.size}, expected = {EXPECTED_FEATURES}")
+    return flat.reshape(1, -1)
 
-def bandpass(start, stop, data, fs=250):
-    bp_Hz = np.array([start, stop])
-    b, a = signal.butter(5, bp_Hz / (fs / 2.0), btype='bandpass')
-    return signal.lfilter(b, a, data, axis=0)
-
-def apply_ica(eeg_data):
-    info = create_info(ch_names=[f'chan{i}' for i in range(CHANNEL_COUNT)], sfreq=SAMPLE_RATE, ch_types='eeg')
-    raw = io.RawArray(eeg_data, info)
-    ica = ICA(n_components=CHANNEL_COUNT, random_state=42, max_iter=800)
-    ica.fit(raw)
-    ica.detect_artifacts(raw)
-    ica.apply(raw)
-    return raw.get_data()
-
-def apply_pca(data, n_components=8):
-    pca = PCA(n_components=n_components)
-    reduced_data = pca.fit_transform(data.T).T
-    return reduced_data
-
-# --- Handle EEG samples from OpenBCI ---
-def handle_sample(sample):
-    timestamp = time.time()
-    scaled = [sample.channels_data[i] * SCALE_FACTOR for i in range(CHANNEL_COUNT)]
-    eeg_history.append((timestamp, scaled))
-
-def start_stream():
-    board = OpenBCICyton(port='COM8', daisy=False)
-    board.start_stream(handle_sample)
-
-# --- Start EEG thread ---
-stream_thread = threading.Thread(target=start_stream)
-stream_thread.daemon = True
-stream_thread.start()
-
-# --- Pygame Setup ---
+# === Pygame UI ===
 pygame.init()
-screen = pygame.display.set_mode((600, 400))
-pygame.display.set_caption("Language Learning Test")
-font = pygame.font.SysFont("Arial", 60)
-small_font = pygame.font.SysFont("Arial", 40)
+screen = pygame.display.set_mode((1000, 1000))
+pygame.display.set_caption("EEG Understanding")
+font = pygame.font.SysFont(None, 90)
+small = pygame.font.SysFont(None, 90)
 clock = pygame.time.Clock()
+symbols = ["Cette","Pomme", "Fille", "Nous","Aimer","Aller"]
+results = []
 
-# --- Configuration ---
-symbols_data = [
-    {"symbol": "Computer"},
-    {"symbol": "Water"},
-    {"symbol": "Cmaflr"},
-    {"symbol": "Amazing"},
-    {"symbol": "Moasdut"},
-]
-
-def draw_screen(symbol, prediction=None):
-    screen.fill((30, 30, 30))
-    symbol_render = font.render(symbol, True, (255, 255, 255))
-    screen.blit(symbol_render, (270, 100))
-
-    if prediction:
-        response_render = small_font.render(f"ML: {prediction}", True, (0, 255, 0))
-        screen.blit(response_render, (200, 250))
-
+def draw(symbol, pred=None):
+    screen.fill((30,30,30))
+    screen.blit(font.render(symbol, True, (255,255,255)), (250,100))
+    if pred is not None:
+        label = "Understood" if pred == 0.0 else "Not Understood"
+        color = (0,255,0) if pred == 0.0 else (255,100,100)
+        screen.blit(small.render(label, True, color), (240,250))
     pygame.display.flip()
 
-def get_next_symbol(index):
-    base = symbols_data[index % len(symbols_data)]
-    return base["symbol"]
-
-# --- Main Loop ---
-start_time = time.time()
-symbol_index = 0
-INTERVAL = 5
-WORD_DISPLAY_TIME = 1
-TOTAL_DURATION = 60
-
-while time.time() - start_time < TOTAL_DURATION:
-    interval_start = time.time()
-    symbol = get_next_symbol(symbol_index)
-    response = None
-
-    draw_screen(symbol)
+# === Main Loop ===
+for i, sym in enumerate(symbols):
+    # wait until buffer has enough samples
+    while len(eeg_buffer) < EEG_WINDOW_SAMPLES+1:
+        print(f"Buffer fill: {len(eeg_buffer)}/{EEG_WINDOW_SAMPLES+1}")
+        time.sleep(0.0000001)
+    draw(sym)
     time.sleep(WORD_DISPLAY_TIME)
-
-    window = [s for t, s in eeg_history if interval_start <= t <= interval_start + EEG_WINDOW_SEC]
-    if len(window) >= EEG_WINDOW_SAMPLES * 0.8:
-        eeg_array = np.array(window).T
-
-        for i in range(eeg_array.shape[0]):
-            eeg_array[i] = notch_filter(60, eeg_array[i])
-        eeg_array = bandpass(0.1, 30, eeg_array)
-        eeg_array = apply_ica(eeg_array)
-        eeg_array = apply_pca(eeg_array)
-
-        features = eeg_array.flatten().reshape(1, -1)
-        prediction = model.predict(features)[0]
-        print(f"Prediction: {prediction}")
-        response = prediction
-
-    if response is not None:
-        draw_screen(symbol, prediction=response)
-    else:
-        draw_screen(symbol, prediction="No EEG")
-
-    while time.time() - interval_start < INTERVAL:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+    window = list(eeg_buffer)
+    features = preprocess_window(window)
+    pred = model.predict(features)[0]
+    print(f"Prediction for {sym}: {pred}")
+    results.append((sym, pred))
+    draw(sym, pred)
+    t0 = time.time()
+    while time.time() - t0 < TRIAL_INTERVAL:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
         clock.tick(30)
 
-    symbol_index += 1
+# === Summary ===
+got = sum(1 for _,p in results if p == 0.0)
+bad = sum(1 for _,p in results if p == 1.0)
+screen.fill((10,10,10))
+# Render texts
+summary_text = font.render("Summary", True, (255, 255, 255))
+understood_text = small.render(f"Understood: {got}", True, (0, 255, 0))
+not_understood_text = small.render(f"Not Understood: {bad}", True, (255, 100, 100))
 
+# Get rectangles and center them
+summary_rect = summary_text.get_rect(center=(500, 100))
+understood_rect = understood_text.get_rect(center=(500, 200))
+not_understood_rect = not_understood_text.get_rect(center=(500, 300))
+
+# Blit centered texts
+screen.blit(summary_text, summary_rect)
+screen.blit(understood_text, understood_rect)
+screen.blit(not_understood_text, not_understood_rect)
+
+pygame.display.flip()
+time.sleep(6)
 pygame.quit()
-print("Done!")
+print("Done")
