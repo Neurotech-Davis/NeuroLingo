@@ -103,10 +103,18 @@ def preprocess_window(window):
 # === Pygame UI ===
 pygame.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen_rect = screen.get_rect()
 pygame.display.set_caption("EEG Understanding")
 font = pygame.font.SysFont(None, 90)
 small = pygame.font.SysFont(None, 90)
 clock = pygame.time.Clock()
+
+def draw_text(text, surf_font, color, y_offset=0):
+    """Render centered text with a vertical offset."""
+    surf = surf_font.render(text, True, color)
+    rect = surf.get_rect(center=screen_rect.center)
+    rect.centery += y_offset
+    screen.blit(surf, rect)
 
 def draw(symbol, pred=None):
     screen.fill((30,30,30))
@@ -121,9 +129,23 @@ def draw(symbol, pred=None):
 # Prompt the user for the language they want to learn
 user_input = ""
 screen.fill((30,30,30))
-screen.blit(font.render("Up = French, Down = English, Left = Spanish, Right = Italian", True, (255,255,255)), (250,100))
+text = """Choose a language to learn
+Up = French
+Down = English
+Left = Spanish
+Right = Custom"""
+lines = text.splitlines()
+y = 100
+for line in lines:
+    rendered_line = font.render(line, True, (255, 255, 255))
+    text_width = rendered_line.get_width()
+    text_height = rendered_line.get_height()
+    x = (screen.get_width() - text_width) // 2
+    screen.blit(rendered_line, (x, y))
+    y += font.get_linesize()
+# Update the display to show the changes
 pygame.display.flip()
-time_wait = 10 # YOU GOT 10 SECONDS TO CHOOSE 
+time_wait = 10 # YOU GOT 10 SECONDS TO CHOOSE
 while (user_input == ""):
     time.sleep(time_wait)
     for event in pygame.event.get():
