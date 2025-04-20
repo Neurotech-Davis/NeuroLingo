@@ -95,7 +95,10 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 screen_rect = screen.get_rect()
 pygame.display.set_caption("EEG Understanding")
 
-font  = pygame.font.SysFont("Showcard Gothic", 200)
+font_path = "C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/realTime/NotoSansEthiopic-VariableFont_wdth,wght.ttf"
+ethiopic_font = pygame.font.Font(font_path, 200)
+
+font  = pygame.font.SysFont(None, 200)
 small = pygame.font.SysFont(None, 90)
 clock = pygame.time.Clock()
 
@@ -116,7 +119,7 @@ def draw_plus():
 def draw(symbol, pred=None):
     """Draw the word (and optionally the prediction)."""
     screen.fill((30,30,30))
-    draw_text(symbol, font, (255,255,255), y_offset=-100)
+    draw_text(symbol, ethiopic_font, (255,255,255), y_offset=-100)
     if pred is not None:
         label = "Understood" if pred == 0.0 else "Not Understood"
         color = (0,255,0) if pred == 0.0 else (255,100,100)
@@ -127,7 +130,7 @@ def draw(symbol, pred=None):
 user_input = ""
 screen.fill((30,30,30))
 menu_text = """Choose a language to learn
-Up = French
+Up = Amharic 
 Down = English
 Left = Spanish
 Right = Italian"""
@@ -147,7 +150,7 @@ while user_input == "" and time.time() - start < 10:
             pygame.quit(); sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                user_input = "FRENCH"
+                user_input = "Amharic"
             elif event.key == pygame.K_DOWN:
                 user_input = "ENGLISH"
             elif event.key == pygame.K_LEFT:
@@ -156,9 +159,9 @@ while user_input == "" and time.time() - start < 10:
                 user_input = "ITALIAN"
 
 # Default to Italian if no choice
-language = user_input or "ITALIAN"
-if language == "FRENCH":
-    symbols = ["Cette","Pomme","Fille","Nous","Aimer","Aller"]
+language = user_input or "ITALIAN"   
+if language == "Amharic":
+    symbols = ["እንኳን","ደህና","መጡ"]
 elif language == "ENGLISH":
     symbols = ["Apple","House","Friend","Learning","Python"]
 elif language == "SPANISH":
