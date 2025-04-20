@@ -95,7 +95,7 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 screen_rect = screen.get_rect()
 pygame.display.set_caption("EEG Understanding")
 
-font  = pygame.font.SysFont(None, 90)
+font  = pygame.font.SysFont("Showcard Gothic", 200)
 small = pygame.font.SysFont(None, 90)
 clock = pygame.time.Clock()
 
