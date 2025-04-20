@@ -102,7 +102,7 @@ def preprocess_window(window):
 
 # === Pygame UI ===
 pygame.init()
-screen = pygame.display.set_mode((1000, 1000))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("EEG Understanding")
 font = pygame.font.SysFont(None, 90)
 small = pygame.font.SysFont(None, 90)
@@ -126,8 +126,8 @@ pygame.display.flip()
 time_wait = 10 # YOU GOT 10 SECONDS TO CHOOSE 
 while (user_input == ""):
     time.sleep(time_wait)
-    for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+    for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
@@ -142,7 +142,7 @@ while (user_input == ""):
         
 
 # Set language symbols
-language = "FRENCH"
+language = user_input
 if (language == "FRENCH"): 
     symbols = ["Cette","Pomme", "Fille", "Nous","Aimer","Aller"]
 elif (language == "ENGLISH"): 
