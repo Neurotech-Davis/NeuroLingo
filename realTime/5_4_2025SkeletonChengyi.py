@@ -1,6 +1,5 @@
 import pygame
 import pygame_gui
-import CLOCK
 import sys
 import time
 import threading
