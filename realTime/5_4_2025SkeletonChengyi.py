@@ -127,9 +127,6 @@ def draw(symbol, pred=None):
         draw_text(label, small, color, y_offset=+50)
     pygame.display.flip()
 
-import pygame
-import pygame_gui
-
 def prompt_custom_symbols():
     """Prompts the user to enter words separated by commas until they type EXIT."""
     pygame.init()
@@ -149,24 +146,24 @@ def prompt_custom_symbols():
     # Load font for prompt text
     font = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
-    running = True
     symbols = []
+    running = True
 
     while running:
         screen.fill((255, 255, 255))  # Clear screen
         prompt_text = font.render("Enter words separated by commas, then press ENTER:", True, (0, 0, 0))
         screen.blit(prompt_text, (50, 200))  # Display prompt
         
-        # Event handling
         UI_REFRESH_RATE = clock.tick(60) / 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#user_input":
-                if event.key == pygame.K_RETURN:
+                if event.text.upper() == "EXIT":
                     running = False
                 else:
                     symbols = [word.strip() for word in event.text.split(",")]
+                    running = False  # Exit loop after receiving valid input
 
             manager.process_events(event)
 
@@ -175,8 +172,8 @@ def prompt_custom_symbols():
 
         pygame.display.flip()
 
-    pygame.quit()
-    return symbols
+    return symbols  # Removed having to close out of pygame
+
 
 # === Language Selection Menu ===
 user_input = ""
