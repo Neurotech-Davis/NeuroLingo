@@ -95,6 +95,7 @@ pygame.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 screen_rect = screen.get_rect()
 pygame.display.set_caption("EEG Understanding")
+manager = pygame_gui.UIManager((800,600))
 
 font_path = "C:/Users/akim0/Documents/OpenBCI_GUI/NeuroLingo/realTime/NotoSansEthiopic-VariableFont_wdth,wght.ttf"
 ethiopic_font = pygame.font.Font(font_path, 200)
@@ -128,52 +129,43 @@ def draw(symbol, pred=None):
     pygame.display.flip()
 
 
-def prompt_custom_symbols():
-    """Prompts the user to enter words until they type EXIT."""
-    pygame.init()
+def prompt_custom_symbols(screen, manager):
+    """Prompts the user to enter words into the existing UI without resetting the screen."""
     
-    # Set up screen and UI manager
-    screen = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption("Word Input Prompt")
-    manager = pygame_gui.UIManager((800, 600))
-
-    # Create input box
     text_input = pygame_gui.elements.UITextEntryLine(
         relative_rect=pygame.Rect((50, 250), (700, 50)),
         manager=manager,
         object_id="#user_input"
     )
 
-    # Load font for prompt text
     font = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
     symbols = []
     running = True
 
     while running:
-        screen.fill((255, 255, 255))  # Clear screen
-        prompt_text = font.render("Enter words individually, then press ENTER. To exit, type EXIT:", True, (0, 0, 0))
-        screen.blit(prompt_text, (50, 200))  # Display prompt
-        
+        screen.fill((30, 30, 30))  # Keep UI consistent
+        draw_text("Enter words individually, then press ENTER. To exit, type EXIT:", font, (255, 255, 255), y_offset=-150)
+
         UI_REFRESH_RATE = clock.tick(60) / 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#user_input":
                 if event.text.upper() == "EXIT":
                     running = False
                 else:
-                    symbols.extend([word.strip() for word in event.text.split(",")])  # Append words
+                    symbols.extend([word.strip() for word in event.text.split(",")])
                     text_input.set_text('')  # Clear input field so user can enter more words
 
             manager.process_events(event)
 
         manager.update(UI_REFRESH_RATE)
         manager.draw_ui(screen)
-
         pygame.display.flip()
 
-    return symbols  # Return collected words
+    return symbols  # Return collected words without quitting PyGame
 
 
 
@@ -221,7 +213,8 @@ elif language == "ENGLISH":
 elif language == "SPANISH":
     symbols = ["Casa","Amigo","Libro","Aprender"]
 elif language == "CUSTOM":
-    symbols = prompt_custom_symbols()
+    symbols = prompt_custom_symbols(screen, manager)
+    print(symbols) # For debugging
 else:
     symbols = ["Ciao","Amore","Mare","Pizza"]
 
