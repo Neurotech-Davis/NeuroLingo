@@ -163,7 +163,7 @@ def prompt_custom_symbols():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#user_input":
-                if event.text.upper() == "EXIT":
+                if event.key == pygame.K_RETURN:
                     running = False
                 else:
                     symbols = [word.strip() for word in event.text.split(",")]
