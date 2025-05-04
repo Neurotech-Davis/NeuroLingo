@@ -411,8 +411,7 @@ def preprocessing(path_EEG_CSV, path_PsychoPy_log, path_PsychoPy_CSV, participan
 	#print(not_learned_flat)
 
 	# return the data
-	
-	
+	return certainly_learned_flat, not_learned_flat
 
 
 # Store our EEG data path in a variable

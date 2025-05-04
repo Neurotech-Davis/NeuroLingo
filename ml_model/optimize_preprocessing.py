@@ -41,17 +41,28 @@ adali_log_path = '../../../Neurotech 24-25/psychoPy_data_new/PsychoPy-20250317T2
 
 #endregion
 
+
+# GOAL:
+# Make a function in which you can try a wide variety of parameters for BOTH preprocessing the data AND the model
+# save a list of the accuracies, confusion matrices, and parameters used for the preporcessing and model
+
 # set parameters here
+
 certainty_threshold = 0.5
 n_components = 8
 t_min = 0.0
 t_max = 0.5
 
 
-pp.preprocessing(wei_eeg_file_path_csv, wei_log_path, wei_psyhcopy_file_path_csv, "JoshuaWei", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(irby_eeg_file_path_csv, irby_log_path, irby_psyhcopy_file_path_csv, "Irby", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(sarah_eeg_file_path_csv, sarah_log_path, sarah_psyhcopy_file_path_csv, "Sarah", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(devin_eeg_file_path_csv, devin_log_path, devin_psyhcopy_file_path_csv, "Devin", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(chengyi_eeg_file_path_csv, chengyi_log_path, chengyi_psyhcopy_file_path_csv, "Chengyi", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(afnaan_eeg_file_path_csv, afnaan_log_path, afnaan_psyhcopy_file_path_csv, "Afnaan", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-pp.preprocessing(adalai_eeg_file_path_csv, adali_log_path, adali_psyhcopy_file_path_csv, "Adali", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(wei_eeg_file_path_csv, wei_log_path, wei_psyhcopy_file_path_csv, "JoshuaWei", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+learned_data, not_learned_data = pp.preprocessing(irby_eeg_file_path_csv, irby_log_path, irby_psyhcopy_file_path_csv, "Irby", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(sarah_eeg_file_path_csv, sarah_log_path, sarah_psyhcopy_file_path_csv, "Sarah", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(devin_eeg_file_path_csv, devin_log_path, devin_psyhcopy_file_path_csv, "Devin", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(chengyi_eeg_file_path_csv, chengyi_log_path, chengyi_psyhcopy_file_path_csv, "Chengyi", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(afnaan_eeg_file_path_csv, afnaan_log_path, afnaan_psyhcopy_file_path_csv, "Afnaan", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+# pp.preprocessing(adalai_eeg_file_path_csv, adali_log_path, adali_psyhcopy_file_path_csv, "Adali", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+
+
+print("leanred data shape:", learned_data.shape)
+print("not leanred data shape:", not_learned_data.shape)
+print("data type is: ", type(learned_data))
