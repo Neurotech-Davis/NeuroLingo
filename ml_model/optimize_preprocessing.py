@@ -7,6 +7,7 @@ import numpy as np
 
 # our own preprocessing script
 import pre_processing_scripts_v2 as pp
+from itertools import product
 
 #region paths
 # set paths
@@ -51,29 +52,49 @@ adali_log_path = '../../../Neurotech 24-25/psychoPy_data_new/PsychoPy-20250317T2
 # Make a function in which you can try a wide variety of parameters for BOTH preprocessing the data AND the model
 # save a list of the accuracies, confusion matrices, and parameters used for the preporcessing and model
 
-# a range of parameters to run the preprocessing with
-certainty_threshold = np.linspace(0.1, 1.0, 10)
-n_components = np.arange(1,9)
-t_min = np.linspace(0.0, 0.2, 5)
-t_max = np.linspace(0.2, 1.0, 10)
+def preprocess_combos():
+    # make lists of paths
+    eeg_paths = [irby_eeg_file_path_csv, sarah_eeg_file_path_csv, devin_eeg_file_path_csv, chengyi_eeg_file_path_csv, afnaan_eeg_file_path_csv, wei_eeg_file_path_csv, adalai_eeg_file_path_csv]
+    psychopy_paths = [irby_psyhcopy_file_path_csv, sarah_psyhcopy_file_path_csv, devin_psyhcopy_file_path_csv, chengyi_psyhcopy_file_path_csv, afnaan_psyhcopy_file_path_csv, wei_psyhcopy_file_path_csv, adali_psyhcopy_file_path_csv]
+    log_paths = [irby_log_path, sarah_log_path, devin_log_path, chengyi_log_path, afnaan_log_path, wei_log_path, adali_log_path]
+    names = ["Irby", "Sarah", "Devin", "Chengyi", "Afnaan", "Wei", "Adali"]
 
-def main_loop():
-    # pp.preprocessing(wei_eeg_file_path_csv, wei_log_path, wei_psyhcopy_file_path_csv, "JoshuaWei", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    learned_data, not_learned_data = pp.preprocessing(irby_eeg_file_path_csv, irby_log_path, irby_psyhcopy_file_path_csv, "Irby", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    learned_data2, not_learned_data2 = pp.preprocessing(sarah_eeg_file_path_csv, sarah_log_path, sarah_psyhcopy_file_path_csv, "Sarah", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    # pp.preprocessing(devin_eeg_file_path_csv, devin_log_path, devin_psyhcopy_file_path_csv, "Devin", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    # pp.preprocessing(chengyi_eeg_file_path_csv, chengyi_log_path, chengyi_psyhcopy_file_path_csv, "Chengyi", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    # pp.preprocessing(afnaan_eeg_file_path_csv, afnaan_log_path, afnaan_psyhcopy_file_path_csv, "Afnaan", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
-    # pp.preprocessing(adalai_eeg_file_path_csv, adali_log_path, adali_psyhcopy_file_path_csv, "Adali", consider_certainty=True, certainty_threshold=certainty_threshold, n_components=n_components, t_min=t_min, t_max=t_max)
+    # a range of parameters to run the preprocessing with
+    certainty_thresholds = np.linspace(0.25, 1.0, 10)
+    n_components_list = np.arange(3,9)
+    t_mins = np.linspace(0.0, 0.2, 5)
+    t_maxs = np.linspace(0.3, 1.0, 5)
 
-    appended_data = np.append(learned_data, learned_data2, axis = 0)
-    # axis = 0 makes sure it combines top down and not side to side
 
-    print("leanred data shape:", learned_data.shape)
-    print("not leanred data shape:", not_learned_data.shape)
-    # print("data type is: ", type(learned_data))
+    # apply combinations to each name    
+    settings = product(certainty_thresholds, n_components_list, t_mins, t_maxs)
+    setting_list = list(settings)
 
-    print("learned data2 shape: ", learned_data2.shape)
-    print("not_learned data2 shape: ", not_learned_data2.shape)
+    # learned_data, not_learned_data = pp.preprocessing(eeg_paths[i], log_paths[i], psychopy_paths[i], names[i], consider_certainty=True, certainty_threshold, n_components, t_min, t_max)
 
-    print("appended shape: ", appended_data.shape)
+    # master lists which are lists of lists
+    master_learned = []
+    master_not_learned = []
+
+    # for each parameter
+    for setting in setting_list[:2]:   # trying just two for now
+        param_list_learned = []        # these will store the preprocessed data
+        param_list_not_learned = []
+        
+        for i in range(0, 1):  # change to len(names) later
+            # decompose setting into parts that can be passed into preprocessing function
+            ct, comp, mini, maxi = setting
+            learned, not_learned = pp.preprocessing(eeg_paths[i], log_paths[i], psychopy_paths[i], names[i], 
+                                                    consider_certainty=True, certainty_threshold=ct, 
+                                                    n_components=comp, t_min=mini, t_max=maxi)
+            
+            param_list_learned.append(learned)
+            param_list_not_learned.append(not_learned)
+
+        master_learned.append(param_list_learned)
+        master_not_learned.append(param_list_not_learned)
+
+    print("Master learned: ", master_learned)
+    print("Master learned shape: ", len(master_learned))
+
+preprocess_combos()
