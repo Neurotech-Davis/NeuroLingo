@@ -1,0 +1,28 @@
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",NeuralNet,0.6199999999999999,"[[28 22]
+ [16 34]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",LDA,0.6,"[[27 23]
+ [17 33]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",LDA,0.55,"[[33 17]
+ [28 22]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",svm_linear,0.54,"[[24 26]
+ [20 30]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",svm_linear,0.54,"[[25 25]
+ [21 29]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",NeuralNet,0.53,"[[25 25]
+ [22 28]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",RandomForest,0.53,"[[28 22]
+ [25 25]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",svm_rbf,0.51,"[[37 13]
+ [36 14]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",svm_rbf,0.5,"[[35 15]
+ [35 15]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",kNN,0.5,"[[31 19]
+ [31 19]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",RandomForest,0.5,"[[27 23]
+ [27 23]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.0}",svm_poly,0.48,"[[10 40]
+ [12 38]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",kNN,0.47000000000000003,"[[24 26]
+ [27 23]]"
+"{'certainty_thresholds': 0.25, 'n_components': 3, 't_maxs': 0.3, 't_mins': 0.1}",svm_poly,0.45999999999999996,"[[18 32]
+ [22 28]]"
