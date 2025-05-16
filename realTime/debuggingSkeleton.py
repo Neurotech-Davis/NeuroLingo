@@ -82,7 +82,7 @@ if not debugging:
     #         print(f"[DEBUG] EEG buffer length: {len(eeg_buffer)}/{EEG_WINDOW_SAMPLES+1}")
 
     # # === Stream Worker ===
-    # def stream_worker():
+    # def stream_worker():  
     #     while True:
     #         try:
     #             #board = OpenBCICyton(port=COM_PORT, daisy=False)
@@ -145,7 +145,7 @@ def draw_plus():
     pygame.display.flip()
     time.sleep(1)
 
-def draw(symbol, pred=None):
+def draw(symbol, pred=None, correct=None):
     """Draw the word (and optionally the prediction)."""
     screen.fill((30,30,30))
     draw_text(symbol, ethiopic_font, (255,255,255), y_offset=-100)
@@ -153,6 +153,9 @@ def draw(symbol, pred=None):
         label = "Understood" if pred == 0.0 else "Not Understood" # TODO: Confirm that 0 means understood.
         color = (0,255,0) if pred == 0.0 else (255,100,100)
         draw_text(label, small, color, y_offset=+50)
+    if correct is not None:
+        time.sleep(1) # Wait 1 second before showing the correct answer
+        draw_text(correct, small, color, y_offset=+200)
     pygame.display.flip()
 
 
@@ -206,11 +209,12 @@ def prompt_custom_symbols(screen, manager):
 user_input = ""
 screen.fill((30,30,30))
 menu_text = """Choose a language to learn
-0 = Custom
-1 = Amharic 
-2 = English
-3 = Spanish
-4 = Italian"""
+
+Press '0' for Custom
+Press '1' for Amharic 
+Press '2' for English
+Press '3' for Spanish
+Press '4' for Italian"""
 y = 100
 for line in menu_text.splitlines():
     surf = font.render(line, True, (255,255,255))
@@ -240,20 +244,19 @@ while user_input == "" and time.time() - start < 10:
 # Default to Italian if no choice
 language = user_input or "ITALIAN"   
 if language == "AMHARIC":
-    symbols = ["እንኳን","ደህና","መጡ"]
+    symbols = ["እንኳን" ,"ደህና","መጡ",]
 elif language == "ENGLISH":
     symbols = ["Apple","House","Friend","Learning","Python"]
 elif language == "SPANISH":
     symbols = ["Casa","Amigo","Libro","Aprender"]
 elif language == "CUSTOM":
     symbols = prompt_custom_symbols(screen, manager)
-    print(symbols) # For debugging
 else:
     symbols = ["Ciao","Amore","Mare","Pizza"]
 
-results = []
-
 # === Main Trial Loop ===
+# TODO: Implement translations
+results = []
 for sym in symbols:
     # 1) fixation cross
     draw_plus()
@@ -277,6 +280,8 @@ for sym in symbols:
         recieved_input = ""
         while recieved_input == "" and time.time() - t0 < DEBUGGING_WINDOW:
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit(); sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_y:
                         recieved_input = 'Y'
@@ -284,7 +289,7 @@ for sym in symbols:
                         recieved_input = 'N'
         if recieved_input is None:
             print("No input received. Continuing...")
-            pred = 0.0  # Default to "Understood"
+            pred = 1.0  # Default to "Not Understood"
         else:
             pred = 0.0 if recieved_input == 'Y' else 1.0
         results.append((sym, pred))
