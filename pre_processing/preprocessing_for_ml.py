@@ -402,21 +402,25 @@ def preprocessing(raw, log_df, psychopy_df, participantName, consider_certainty,
 	#print(f"Flattened shape: {X_flat.shape}")
 	#print(X_flat)
 
+	not_learned_flat = not_learned_pca.reshape(not_learned_pca.shape[0], -1)  # Shape: (epochs, components * times)
+
 	if (consider_certainty):
 		certainly_learned_flat = certainly_learned_pca.reshape(certainly_learned_pca.shape[0], -1)  # Shape: (epochs, components * times)
 		#print(f"Flattened shape: {certainly_learned_flat.shape}")
 		#print(certainly_learned_flat)
+		return certainly_learned_flat, not_learned_flat
 	else:
 		learned_flat = learned_pca.reshape(learned_pca.shape[0], -1)  # Shape: (epochs, components * times)
 		#print(f"Flattened shape: {learned_flat.shape}")
 		#print(learned_flat)
+		return learned_flat, not_learned_flat
 
-	not_learned_flat = not_learned_pca.reshape(not_learned_pca.shape[0], -1)  # Shape: (epochs, components * times)
+	
 	#print(f"Flattened shape: {not_learned_flat.shape}")
 	#print(not_learned_flat)
 
 	# return the data
-	return certainly_learned_flat, not_learned_flat
+	return "error"
 
 
 # Store our EEG data path in a variable

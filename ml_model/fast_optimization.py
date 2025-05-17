@@ -179,7 +179,7 @@ def optimization(raw_eeg_data, psychopy_data, log_data, names):
         'n_components' : np.arange(3,9),
         't_mins' : np.linspace(0.0, 0.2, 3),
         't_maxs' : np.linspace(0.3, 1.0, 5),
-        'consider_certainty': [True, False]
+        'consider_certainty': [False, True]
     }
 
     MODEL_FACTORIES = {
@@ -207,7 +207,7 @@ def optimization(raw_eeg_data, psychopy_data, log_data, names):
     # for each setting run it through preprocessing to get the X and Y
     for setting in ParameterGrid(preprocess_grid):
         count += 1
-        print("count is: ", count)
+        print("------------------- count is: ", count, "--------------------------")
 
         # just X and y, cross val score will handle the rest
         X, y = preprocess(raw_eeg_data, psychopy_data, log_data, names, setting)
